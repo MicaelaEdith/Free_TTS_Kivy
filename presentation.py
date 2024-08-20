@@ -18,7 +18,7 @@ class MyGridLayout(BoxLayout):
         self.padding = [20, 80, 0, 10]
         self.spacing = 10
         self.theme = True
-        self.tss = TTS_Kivy()
+        self.tts = TTS_Kivy()
         self.selection_l = ('all','en','es')
 
         Window.size = (650, 450)
@@ -51,7 +51,7 @@ class MyGridLayout(BoxLayout):
 
         self.spinner = Spinner(
             text='Select a voice',
-            values=list(self.tss.list()),
+            values=list(self.tts.list()),
             size_hint=(None, None),
             size=(250, 50),
             background_color=spinner_background_color,
@@ -106,7 +106,7 @@ class MyGridLayout(BoxLayout):
             size_hint=(None, None),
             size=(480, 300),
             multiline=True,
-            font_size='24sp',
+            font_size='16sp',
             font_name='MyFont',
             background_color=spinner_background_color,
             foreground_color=text_color,
@@ -117,8 +117,24 @@ class MyGridLayout(BoxLayout):
 
         self.add_widget(self.text_input)
 
+        row2 = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50)   
+
+        download_button = Button(
+            text='Download',
+            size_hint=(None, None),
+            size=(105, 50), 
+            background_color=button_color,
+            color=text_color,
+            border=(1, 1, 1, 1),
+            font_size='18sp',
+            font_name='MyFont' 
+        )
+        download_button.bind(on_press=lambda x: self.tts.execute_action(self.text_input))
+
+        row2.add_widget(download_button)
+
         accept_button = Button(
-            text='Accept',
+            text='try',
             size_hint=(None, None),
             size=(95, 50), 
             background_color=button_color,
@@ -127,8 +143,11 @@ class MyGridLayout(BoxLayout):
             font_size='18sp',
             font_name='MyFont' 
         )
-        accept_button.bind(on_press=lambda x: self.tss.execute_action(self.text_input))
-        self.add_widget(accept_button)
+        accept_button.bind(on_press=self.on_accept_button_press)
+
+
+        row2.add_widget(accept_button)
+        self.add_widget(row2)
 
     def toggle_theme(self, instance):
 
@@ -159,6 +178,8 @@ class MyGridLayout(BoxLayout):
         self.text_input.background_color = spinner_background_color
         self.text_input.foreground_color = text_color
 
+    def on_accept_button_press(self, instance):
+        self.tts.audio_speaker(self.text_input.text)
 
 
     def on_request_close(self, *args):

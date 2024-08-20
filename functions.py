@@ -3,6 +3,9 @@ from kivy.uix.label import Label
 from TTS.utils.manage import ModelManager
 from TTS.api import TTS
 from datetime import datetime
+from pydub import AudioSegment
+from pydub.playback import play
+import io
 
 class TTS_Kivy():
     def __init__(self):
@@ -64,3 +67,17 @@ class TTS_Kivy():
 
         return list(self.multilingual_models+self.es_models+self.en_models)
 
+    def audio_speaker(self, text):
+        self.text = text
+        tts = TTS(model_name=self.models[0])
+
+        audio_data = tts.tts(text=self.text)
+
+        audio_segment = AudioSegment(
+            data=io.BytesIO(audio_data).getvalue(),
+            sample_width=2,
+            frame_rate=22050,
+            channels=1
+        )
+        
+        play(audio_segment)
