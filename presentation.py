@@ -7,33 +7,63 @@ from kivy.core.text import LabelBase
 from kivy.utils import get_color_from_hex
 from functions import TTS_Kivy
 from kivy.uix.switch import Switch
-from action_bar import CustomActionBar
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.actionbar import ActionBar, ActionView, ActionPrevious, ActionButton
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
 
-#from kivy.lang import Builder
-
-#Builder.load_file('style.kv')
-
-LabelBase.register(name='MyFont', fn_regular='assets/KodeMono-VariableFont_wght.ttf')
+LabelBase.register(name='MyFont', fn_regular='assets/NotoSans-VariableFont_wdthwght.ttf')
 
 class MyGridLayout(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
-        self.padding = [20, 80, 0, 10]
-        self.spacing = 10
+        self.padding = [0, 0, 0, 0]
+        self.spacing = 18
         self.theme = True
         self.tts = TTS_Kivy()
         self.selection_l = ('all', 'en', 'es')
 
-        # Configure colors based on the theme
+        Window.borderless = False
         self.update_colors()
 
-        # Initialize the ActionBar
-        #self.action_bar = CustomActionBar(self)
-        #self.add_widget(self.action_bar)
+        # Action Bar
+        action_bar = ActionBar(size_hint_y=None, height=45, padding=[0, 0, 0, 0])
+        action_view = ActionView()
+
+        action_previous = ActionPrevious(title='TTS_Kivy', with_previous=False)
+        action_view.add_widget(action_previous)
+
+        theme_dropdown = DropDown()
+        light_button = Button(text='Light', size_hint_y=None, height=44)
+        light_button.bind(on_release=lambda btn: self.set_theme(True))
+        dark_button = Button(text='Dark', size_hint_y=None, height=44)
+        dark_button.bind(on_release=lambda btn: self.set_theme(False))
+        theme_dropdown.add_widget(light_button)
+        theme_dropdown.add_widget(dark_button)
+
+        theme_button = ActionButton(text='Theme')
+        theme_button.bind(on_release=theme_dropdown.open)
+        action_view.add_widget(theme_button)
+
+        language_dropdown = DropDown()
+        english_button = Button(text='English', size_hint_y=None, height=44)
+        english_button.bind(on_release=lambda btn: self.on_language_select(self.spinner_l, 'En'))
+        spanish_button = Button(text='Español', size_hint_y=None, height=44)
+        spanish_button.bind(on_release=lambda btn: self.on_language_select(self.spinner_l, 'Es'))
+        language_dropdown.add_widget(english_button)
+        language_dropdown.add_widget(spanish_button)
+
+        language_button = ActionButton(text='Language')
+        language_button.bind(on_release=language_dropdown.open)
+        action_view.add_widget(language_button)
+
+        action_bar.add_widget(action_view)
+        self.add_widget(action_bar)
+
         Window.clearcolor = self.window_background_color
 
-        row1 = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=50)
+        row1 = BoxLayout(orientation='horizontal', spacing=30, size_hint_y=None, height=50, padding = [18, 0, 0, 0])
 
         model_dict = self.tts.classify_and_list_models()
         self.spinner = Spinner(
@@ -76,20 +106,11 @@ class MyGridLayout(BoxLayout):
         )
         row1.add_widget(select_button)
 
-        theme_switch_layout = BoxLayout(orientation='horizontal', size_hint=(None, None), size=(80, 50), spacing=0, padding=[50, 50, 50, 40])
-
-        theme_switch = Switch(
-            active=self.theme,
-            size_hint=(None, None),
-            size=(40, 25),
-        )
-        theme_switch.bind(active=self.toggle_theme)
-
-        theme_switch_layout.add_widget(theme_switch)
-        row1.add_widget(theme_switch_layout)
 
         self.add_widget(row1)
-
+        
+        padding_layout = BoxLayout(orientation='vertical', size_hint_y=None, height=300)
+        padding_layout.padding = [18, 0, 0, 0]
         self.text_input = TextInput(
             hint_text='Type here',
             size_hint=(None, None),
@@ -100,13 +121,13 @@ class MyGridLayout(BoxLayout):
             background_color=self.spinner_background_color,
             foreground_color=self.text_color,
             readonly=False,
-            text_validate_unfocus=True
+            text_validate_unfocus=True,
+           
         )
+        padding_layout.add_widget(self.text_input)
+        self.add_widget(padding_layout)
 
-        self.add_widget(self.text_input)
-
-        row2 = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50)
-
+        row2 = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50,  padding = [18, 4, 0, 18])
         download_button = Button(
             text='Download',
             size_hint=(None, None),

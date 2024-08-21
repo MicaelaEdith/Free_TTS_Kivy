@@ -3,8 +3,8 @@ from presentation import MyGridLayout
 from kivy.config import Config
 
 Config.set('graphics', 'resizable', '0')
-Config.set('graphics', 'width', '670')
-Config.set('graphics', 'height', '450')
+Config.set('graphics', 'width', '650')
+Config.set('graphics', 'height', '500')
 Config.write()
 
 class MyApp(App):
