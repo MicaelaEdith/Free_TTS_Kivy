@@ -31,7 +31,8 @@ class MyGridLayout(BoxLayout):
         action_bar = ActionBar(size_hint_y=None, height=45, padding=[0, 0, 0, 0])
         action_view = ActionView()
 
-        action_previous = ActionPrevious(title='TTS_Kivy', with_previous=False)
+        action_previous = ActionPrevious(title='', with_previous=False)
+        action_previous.icon = None
         action_view.add_widget(action_previous)
 
         theme_dropdown = DropDown()
