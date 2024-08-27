@@ -15,6 +15,8 @@ from kivy.uix.widget import Widget
 
 
 LabelBase.register(name='MyFont', fn_regular='assets/NotoSans-VariableFont_wdthwght.ttf')
+#LabelBase.register(name='MyBoldFont', fn_regular='assets/NotoSans-Bold.ttf')
+
 
 class MyGridLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -24,13 +26,12 @@ class MyGridLayout(BoxLayout):
         self.spacing = 18
         self.theme = False
         self.tts = TTS_Kivy()
-        self.selection_l = ('all', 'en', 'es')
+        self.selection_l = ''
         self.lan_menu = 'en'
 
         Window.borderless = False
         self.update_colors()
 
-        # Action Bar
         action_bar = BoxLayout(size_hint_y=None, height=45, padding=[18, 0, 0, 0], orientation='horizontal', spacing=10)
         
         action_view = BoxLayout(size_hint=(1, 1), padding=[0, 0, 0, 0], orientation='horizontal', spacing=10)
@@ -40,7 +41,7 @@ class MyGridLayout(BoxLayout):
             text='Light',
             size_hint_y=None,
             height=44,
-            background_color=self.window_background_color,
+            background_color=self.button_color,
             color=self.text_color,
             padding=[5, 5],
             border=(1, 1, 1, 1),
@@ -51,7 +52,7 @@ class MyGridLayout(BoxLayout):
             text='Dark',
             size_hint_y=None,
             height=44,
-            background_color=self.window_background_color,
+            background_color=self.button_color,
             color=self.text_color,
             padding=[5, 5],
             border=(1, 1, 1, 1),
@@ -61,7 +62,7 @@ class MyGridLayout(BoxLayout):
         theme_dropdown.add_widget(self.light_button)
         theme_dropdown.add_widget(self.dark_button)
 
-        self.theme_button = ActionButton(text='Theme', background_color=(0, 0, 0, 0),font_name='MyFont',color=self.text_color)
+        self.theme_button = ActionButton(text='Theme', background_color=self.spinner_background_color,font_name='MyFont',color=self.text_color)
         self.theme_button.bind(on_release=theme_dropdown.open)
         action_view.add_widget(self.theme_button)
 
@@ -70,7 +71,7 @@ class MyGridLayout(BoxLayout):
             text='English',
             size_hint_y=None,
             height=44,
-            background_color=self.window_background_color,
+            background_color=self.button_color,
             color=self.text_color,
             padding=[5, 5],
             border=(1, 1, 1, 1),
@@ -81,7 +82,7 @@ class MyGridLayout(BoxLayout):
             text='Spanish',
             size_hint_y=None,
             height=44,
-            background_color=self.window_background_color,
+            background_color=self.button_color,
             color=self.text_color,
             padding=[5, 5],
             border=(1, 1, 1, 1),
@@ -91,7 +92,7 @@ class MyGridLayout(BoxLayout):
         language_dropdown.add_widget(self.english_button)
         language_dropdown.add_widget(self.spanish_button)
 
-        self.language_button = ActionButton(text='Language', background_color=(0, 0, 0, 0), font_name='MyFont',color=self.text_color)
+        self.language_button = ActionButton(text='Language', background_color=self.spinner_background_color, font_name='MyFont',color=self.text_color)
         self.language_button.bind(on_release=language_dropdown.open)
         action_view.add_widget(self.language_button)
 
@@ -113,12 +114,13 @@ class MyGridLayout(BoxLayout):
             font_size='18sp',
             font_name='MyFont'
         )
+        
         self.spinner.bind(text=self.on_spinner_select)
         row1.add_widget(self.spinner)
 
         self.spinner_l = Spinner(
             text='lan',
-            values=['All', 'En', 'Es'],
+            values=['All', 'En', 'Sp'],
             size_hint=(None, None),
             size=(70, 35),
             background_color=self.spinner_background_color,
@@ -126,15 +128,16 @@ class MyGridLayout(BoxLayout):
             font_size='18sp',
             font_name='MyFont'
         )
+
         self.spinner_l.bind(text=self.on_language_select)
         row1.add_widget(self.spinner_l)
 
-        self.on_language_select(self.spinner_l, 'All')
+        self.on_language_select('All',self.spinner_l)
 
         self.select_button = Button(
             text='Select',
             size_hint=(None, None),
-            size=(90, 35),
+            size=(95, 35),
             background_color=self.button_color,
             color=self.text_color,
             border=(1, 1, 1, 1),
@@ -154,8 +157,9 @@ class MyGridLayout(BoxLayout):
             multiline=True,
             font_size='16sp',
             font_name='MyFont',
-            background_color=self.spinner_background_color,
+            background_color=self.window_background_color,
             foreground_color=self.text_color,
+            border=(1, 1, 1, 1),
             readonly=False,
             text_validate_unfocus=True,
         )
@@ -192,19 +196,20 @@ class MyGridLayout(BoxLayout):
         row2.add_widget(self.accept_button)
         self.add_widget(row2)
 
+
     def update_colors(self):
-        if not self.theme:
-            self.action_background_color_hex = '#000001'
-            self.window_background_color_hex = '#000000'
-            self.button_color_hex = '#121212'
+        if not self.theme:          #dark
+            self.action_background_color_hex = '#090909'
+            self.window_background_color_hex = '#090909'
+            self.button_color_hex = '#323232'
             self.spinner_background_color_hex = '#1a1a1a'
-            self.text_color_hex = '#BB86FC'
+            self.text_color_hex = '#559e53'
         else:
             self.action_background_color_hex = '#0ffff0'
             self.window_background_color_hex = '#ffffff'
-            self.button_color_hex = '#252525'
-            self.spinner_background_color_hex = '#181818'
-            self.text_color_hex = '#BB86FC'
+            self.button_color_hex = '#8d908d'
+            self.spinner_background_color_hex = '#8d908d'
+            self.text_color_hex = '#559e53'
 
         self.window_background_color = get_color_from_hex(self.window_background_color_hex)
         self.button_color = get_color_from_hex(self.button_color_hex)
@@ -212,10 +217,49 @@ class MyGridLayout(BoxLayout):
         self.text_color = get_color_from_hex(self.text_color_hex)
 
         Window.clearcolor = self.window_background_color
-
+            
     def toggle_theme(self, value):
         self.theme = value
         self.update_colors()
+        self.apply_colors_to_widgets()
+
+    def apply_colors_to_widgets(self):
+        # ActionBar colors
+        self.theme_button.background_color = self.spinner_background_color
+        self.theme_button.color = self.text_color
+        self.language_button.background_color = self.spinner_background_color
+        self.language_button.color = self.text_color
+
+        # Theme dropdown buttons
+        self.light_button.background_color = self.button_color
+        self.light_button.color = self.text_color
+        self.dark_button.background_color = self.button_color
+        self.dark_button.color = self.text_color
+
+        # Language dropdown buttons
+        self.english_button.background_color = self.button_color
+        self.english_button.color = self.text_color
+        self.spanish_button.background_color = self.button_color
+        self.spanish_button.color = self.text_color
+
+        # Spinner colors
+        self.spinner.background_color = self.spinner_background_color
+        self.spinner.color = self.text_color
+        self.spinner_l.background_color = self.spinner_background_color
+        self.spinner_l.color = self.text_color
+
+        # Button colors
+        self.select_button.background_color = self.button_color
+        self.select_button.color = self.text_color
+        self.download_button.background_color = self.button_color
+        self.download_button.color = self.text_color
+        self.accept_button.background_color = self.button_color
+        self.accept_button.color = self.text_color
+
+        # TextInput colors
+        self.text_input.background_color = self.window_background_color
+        self.text_input.foreground_color = self.text_color
+
 
     def on_accept_button_press(self, instance):
         self.tts.audio_speaker(self.text_input.text)
@@ -227,7 +271,10 @@ class MyGridLayout(BoxLayout):
         print(f"Modelo seleccionado: {self.selected_model}")
 
     def on_language_select(self,spinner, text):
-        self.tts.update_model_spinner(text, self.spinner)
+        self.selection_l = text
+        print(text)
+        self.spinner.values = self.tts.update_model_spinner(spinner, self.selection_l)
+
         
     def update_menu(self, text):
         if text=='en':
@@ -241,8 +288,9 @@ class MyGridLayout(BoxLayout):
             self.spanish_button.text='Spanish'
             self.english_button.text='English'
             self.spinner.text='Select a voice'
+            self.text_input.hint_text='Type here'
             self.spinner_l.text='lan'
-            self.spinner_1.values=['All', 'En', 'Es']
+            self.spinner_l.values=['All', 'En', 'Sp']
             
         else:
             self.theme_button.text = 'Tema'
@@ -255,8 +303,9 @@ class MyGridLayout(BoxLayout):
             self.spanish_button.text='Español'
             self.english_button.text='Ingles'
             self.spinner.text='Seleccionar voz'
+            self.text_input.hint_text='Escriba aquí'
             self.spinner_l.text='len'
-            self.spinner_1.values=['Todas', 'In', 'Es']
+            self.spinner_l.values=['Todas', 'In', 'Es']
 
     def on_request_close(self, *args):
         return False

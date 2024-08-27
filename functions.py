@@ -3,6 +3,7 @@ from kivy.uix.label import Label
 from TTS.utils.manage import ModelManager
 from TTS.api import TTS
 from datetime import datetime
+from kivy.uix.spinner import Spinner
 from pydub import AudioSegment
 from pydub.playback import play
 import io
@@ -78,16 +79,17 @@ class TTS_Kivy:
         )
         play(audio_segment)
 
-    def update_model_spinner(self, selected_language, spinner):
-        if selected_language == 'All':
+    def update_model_spinner(self, spinner, selected_language):
+        values = []
+
+        if selected_language == 'All' or selected_language == 'Todas' or not selected_language:
             values = list(self.multilingual_models + self.es_models + self.en_models)
         elif selected_language == 'Multilingual':
             values = list(self.multilingual_models)
-        elif selected_language == 'En':
+        elif selected_language == 'En' or selected_language == 'In':
             values = list(self.en_models)
-        elif selected_language == 'Es':
+        elif selected_language == 'Es' or selected_language == 'Sp':
             values = list(self.es_models)
-
-        spinner.values = values
-        if values:
-            spinner.text = values[0]
+        
+        print(values)
+        return values
