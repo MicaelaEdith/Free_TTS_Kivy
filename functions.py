@@ -19,9 +19,6 @@ class TTS_Kivy:
         self.filter = False
         self.filter_on = 'all'
         self.classify_and_list_models()
-        print('lista 1:')
-        print(self.model_manager.list_models())
-        print('fin lista 1')
 
     def list(self):
         if not self.filter or self.filter_on == 'all':
@@ -76,8 +73,6 @@ class TTS_Kivy:
         return model_dict
 
     def audio_speaker(self, text, model):
-        print('paso modelo speaker')
-        print('modelo = ', model)
         tts = TTS(model_name=model)
         audio_data = tts.tts(text=text)
         audio_segment = AudioSegment(
@@ -101,7 +96,6 @@ class TTS_Kivy:
             values = list(self.es_models)
         
         spinner.values = values
-        spinner.text = 'Select a voice' if not values else values[0]
 
         print(values)
         return values

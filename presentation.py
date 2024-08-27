@@ -273,8 +273,8 @@ class MyGridLayout(BoxLayout):
 
         self.text_input.background_color = self.window_background_color
         self.text_input.foreground_color = self.text_color
-        self.text_input.cursor_color = self.text_color #self.cursor_color
-        self.text_input.selection_color = self.text_color #self.selection_color
+        self.text_input.cursor_color = self.text_color 
+        self.text_input.selection_color = self.text_color
 
 
     def on_accept_button_press(self, instance):
