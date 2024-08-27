@@ -49,21 +49,4 @@ def write_model(model_name, model_path):
         writer = csv.writer(file)
         writer.writerow([model_name, model_path])
 
-# Ejemplo de uso
-if __name__ == '__main__':
-    # Guardar configuración
-    write_config('#ffffff', 'en')
-
-    # Leer configuración
-    color, language = read_config()
-    print(f"Color: {color}, Language: {language}")
-
-    # Guardar modelos clonados
-    write_model('VoiceClone1', '/path/to/model1')
-    write_model('VoiceClone2', '/path/to/model2')
-
-    # Leer modelos clonados
-    models = read_models()
-    for model in models:
-        print(f"Model Name: {model['model_name']}, Model Path: {model['model_path']}")
 
