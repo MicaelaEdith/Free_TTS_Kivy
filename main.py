@@ -10,7 +10,8 @@ Config.write()
 
 class MyApp(App):
     def build(self):
-        self.title = "TSS.kivy"
+        self.title = "Free TTS"
+        self.icon = 'assets/img/favicon.png'
         return MyGridLayout()
 
 

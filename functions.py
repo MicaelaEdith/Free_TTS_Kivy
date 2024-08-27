@@ -6,6 +6,7 @@ from datetime import datetime
 from kivy.uix.spinner import Spinner
 from pydub import AudioSegment
 from pydub.playback import play
+from app_data import voice_models
 import io
 
 class TTS_Kivy:
@@ -18,6 +19,9 @@ class TTS_Kivy:
         self.filter = False
         self.filter_on = 'all'
         self.classify_and_list_models()
+        print('lista 1:')
+        print(self.model_manager.list_models())
+        print('fin lista 1')
 
     def list(self):
         if not self.filter or self.filter_on == 'all':
@@ -26,6 +30,9 @@ class TTS_Kivy:
             list_ = self.en_models
         elif self.filter_on == 'es':
             list_ = self.es_models
+        print('return_list_ : ')
+        print(list_)
+
         return list_
 
     def filter(self, lan):
@@ -68,8 +75,10 @@ class TTS_Kivy:
 
         return model_dict
 
-    def audio_speaker(self, text):
-        tts = TTS(model_name=self.models[0])
+    def audio_speaker(self, text, model):
+        print('paso modelo speaker')
+        print('modelo = ', model)
+        tts = TTS(model_name=model)
         audio_data = tts.tts(text=text)
         audio_segment = AudioSegment(
             data=io.BytesIO(audio_data).getvalue(),
@@ -91,5 +100,13 @@ class TTS_Kivy:
         elif selected_language == 'Es' or selected_language == 'Sp':
             values = list(self.es_models)
         
+        spinner.values = values
+        spinner.text = 'Select a voice' if not values else values[0]
+
         print(values)
         return values
+
+    def update_model_data(new_data):
+        voice_models.clear()
+        for model in new_data:
+            voice_models[model['id']] = model['name']
