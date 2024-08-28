@@ -12,12 +12,9 @@ from kivy.uix.dropdown import DropDown
 from kivy.graphics import Color, Line
 from kivy.uix.widget import Widget
 from csv_functions import *
-
-
+from app_data import *
 
 LabelBase.register(name='MyFont', fn_regular='assets/NotoSans-VariableFont_wdthwght.ttf')
-#LabelBase.register(name='MyBoldFont', fn_regular='assets/NotoSans-Bold.ttf')
-
 
 class MyGridLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -278,14 +275,15 @@ class MyGridLayout(BoxLayout):
 
 
     def on_accept_button_press(self, instance):
-        model = self.spinner.text
-        self.tts.audio_speaker(self.text_input.text, model)
+        model_dict = self.tts.classify_and_list_models()
+        selected_model_path = model_dict.get(self.spinner.text)
+        self.selected_model = selected_model_path
+        self.tts.audio_speaker(self.text_input.text,self.selected_model)
 
     def on_spinner_select(self, spinner, text):
         model_dict = self.tts.classify_and_list_models()
         selected_model_path = model_dict.get(text)
         self.selected_model = selected_model_path
-        print(f"Modelo seleccionado: {self.selected_model}")
 
     def on_language_select(self,spinner, text):
         self.selection_l = text
@@ -311,7 +309,7 @@ class MyGridLayout(BoxLayout):
             self.lan_menu = 'en'
             
         else:
-            self.theme_button.text = 'Tema'
+            self.theme_button.text = 'Modo'
             self.language_button.text = 'Idioma'
             self.accept_button.text = 'Probar'
             self.download_button.text = 'Descargar'
