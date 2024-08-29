@@ -184,7 +184,7 @@ class MyGridLayout(BoxLayout):
             font_size='18sp',
             font_name='MyFont'
         )
-        self.download_button.bind(on_press=lambda x: self.tts.execute_action(self.text_input))
+        self.download_button.bind(on_press=self.on_download_button_press)
 
         row2.add_widget(self.download_button)
 
@@ -213,7 +213,7 @@ class MyGridLayout(BoxLayout):
             self.button_color_hex = '#323232'
             self.spinner_background_color_hex = '#1a1a1a'
             self.text_color_hex = '#559e53'
-            self.cursor_color_hex = '#559e53'
+            self.cursor_color_hex = '#ffffff' #'#559e53'
             self.selection_color_hex = '#323232'
         else:                       # light
             self.action_background_color_hex = '#0ffff0'
@@ -221,7 +221,7 @@ class MyGridLayout(BoxLayout):
             self.button_color_hex = '#8d908d'
             self.spinner_background_color_hex = '#8d908d'
             self.text_color_hex = '#559e53'
-            self.cursor_color_hex = '#559e53'
+            self.cursor_color_hex = '#ffffff' #'#559e53'
             self.selection_color_hex = '#8d908d'
 
         self.window_background_color = get_color_from_hex(self.window_background_color_hex)
@@ -272,6 +272,12 @@ class MyGridLayout(BoxLayout):
         self.text_input.foreground_color = self.text_color
         self.text_input.cursor_color = self.text_color 
         self.text_input.selection_color = self.text_color
+
+    def on_download_button_press(self, instance):
+        model_dict = self.tts.classify_and_list_models()
+        selected_model_path = model_dict.get(self.spinner.text)
+        self.selected_model = selected_model_path
+        self.tts.execute_action(self.text_input.text,self.selected_model)
 
 
     def on_accept_button_press(self, instance):

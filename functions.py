@@ -7,8 +7,8 @@ from kivy.uix.spinner import Spinner
 from pydub import AudioSegment
 from pydub.playback import play
 from app_data import voice_models
-import io
-import numpy as np
+import simpleaudio as sa
+import os
 
 
 class TTS_Kivy:
@@ -40,9 +40,11 @@ class TTS_Kivy:
         return models_
 
     def execute_action(self, text_input, model):
-        tts = TTS(model_name=model)
-        text = text_input.text
-        tts.tts_to_file(text=text, file_path="output" + str(datetime.now()) + ".wav")
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        temp = "output_" + timestamp + ".wav"
+        tts = TTS(model_name=model)  
+        tts.tts_to_file(text=text_input, file_path=temp)
+
 
     def classify_and_list_models(self):
         model_dict = {}
@@ -74,30 +76,19 @@ class TTS_Kivy:
         return model_dict
 
 
-    def audio_speaker(self, text, model):
-        tts = TTS(model_name=model)
-        
-        audio_data = tts.tts(text=text)
-        
-        print(f"type audio_data: {type(audio_data)}")
-        print(f"contenido audio_data (primeros 100 bytes): {audio_data[:100] if isinstance(audio_data, (bytes, bytearray)) else 'No compatible'}")
-        
-        if isinstance(audio_data, np.ndarray):
-            audio_data = (audio_data * 32767).astype(np.int16)
-            audio_data_bytes = audio_data.tobytes()
-        elif isinstance(audio_data, (bytes, bytearray)):
-            audio_data_bytes = audio_data
-        else:
-            raise TypeError("formato de audio_data no soportado")
-        
-        audio_segment = AudioSegment(
-            data=io.BytesIO(audio_data_bytes),
-            sample_width=2,
-            frame_rate=22050,
-            channels=1
-        )
 
-        play(audio_segment)
+    def audio_speaker(self, text, model):
+        temp = "temp_audio.wav"  
+        tts = TTS(model_name=model)  
+        tts.tts_to_file(text=text, file_path=temp)
+        audio = AudioSegment.from_wav(temp)
+        play_obj = sa.play_buffer(audio.raw_data, 
+                                num_channels=audio.channels,
+                                bytes_per_sample=audio.sample_width, 
+                                sample_rate=audio.frame_rate)
+        play_obj.wait_done()
+
+        os.remove(temp)
 
     def update_model_spinner(self, spinner, selected_language):
         values = []
@@ -120,3 +111,6 @@ class TTS_Kivy:
         voice_models.clear()
         for model in new_data:
             voice_models[model['id']] = model['name']
+
+
+#
