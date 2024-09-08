@@ -8,6 +8,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 from app_data import voice_models
 import simpleaudio as sa
+from csv_functions import *
 import os
 
 
@@ -15,72 +16,71 @@ class TTS_Kivy:
     def __init__(self):
         self.model_manager = ModelManager()
         self.models = self.model_manager.list_models()
-        self.multilingual_models = []
-        self.es_models = []
-        self.en_models = []
+        self.all_models= [['css10','tts_models/es/css10/vits'],['Mai','tts_models/es/mai/tacotron2-DDC'],['Female1','tts_models/multilingual/multi-dataset/your_tts'],['Female2','tts_models/multilingual/multi-dataset/your_tts'],['Male1','tts_models/multilingual/multi-dataset/your_tts'],['Male2','tts_models/multilingual/multi-dataset/your_tts']]
+        self.es_models = [['css10','tts_models/es/css10/vits'],['Mai','tts_models/es/mai/tacotron2-DDC']]
+        self.en_models = [['Female1','tts_models/multilingual/multi-dataset/your_tts'],['Female2','tts_models/multilingual/multi-dataset/your_tts'],['Male1','tts_models/multilingual/multi-dataset/your_tts'],['Male2','tts_models/multilingual/multi-dataset/your_tts']]
         self.filter = False
         self.filter_on = 'all'
         self.classify_and_list_models()
 
     def list(self):
-        if not self.filter or self.filter_on == 'all':
-            list_ = self.classify_and_list_models()
-        elif self.filter_on == 'en':
-            list_ = self.en_models
-        elif self.filter_on == 'es':
-            list_ = self.es_models
-        print('return_list_ : ')
-        print(list_)
-
-        return list_
+        print(self.all_models)
+        return self.all_models
 
     def filter(self, lan):
-        self.lan = lan
-        models_ = [model for model in self.models if self.lan in model]
-        return models_
+        result= []
+        if lan == 'All' or lan == 'Todas':
+            result = self.all_models
+        elif lan == 'Es' or lan == 'Sp':
+            result = self.es_models
+        elif lan == 'En' or lan == 'In':
+            result = self.en_models
+           
+        return result
 
     def execute_action(self, text_input, model):
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        temp = "output_" + timestamp + ".wav"
-        tts = TTS(model_name=model)  
-        tts.tts_to_file(text=text_input, file_path=temp)
+        print('selected Model in fuction: ', model)
+        for i in self.all_models:
+            if i[0] == model:
+                model_ = i[1]
 
-
-    def classify_and_list_models(self):
-        model_dict = {}
-
-        for path in self.models:
-            parts = path.split('/')
-
-            if 'multilingual' in parts:
-                index = parts.index('multilingual') + 2
-                if index < len(parts):
-                    model_name = parts[index].replace('_', ' ').capitalize()
-                    self.multilingual_models.append(model_name)
-                    model_dict[model_name] = path
-
-            elif 'es' in parts:
-                index = parts.index('es') + 1
-                if index < len(parts):
-                    model_name = parts[index].replace('_', ' ').capitalize()
-                    self.es_models.append(model_name)
-                    model_dict[model_name] = path
-
-            elif 'en' in parts:
-                index = parts.index('en') + 1
-                if index < len(parts):
-                    model_name = parts[index].replace('_', ' ').capitalize()
-                    self.en_models.append(model_name)
-                    model_dict[model_name] = path
-
-        return model_dict
+        models_ok = read_models()
+        if model_ in models_ok:
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            temp = "output_" + timestamp + ".wav"
+            tts = TTS(model_name=model_)  
+            tts.tts_to_file(text=text_input, file_path=temp)
+        else:
+            print('model missing')
 
 
 
-    def audio_speaker(self, text, model):
-        temp = "temp_audio.wav"  
-        tts = TTS(model_name=model)  
-        tts.tts_to_file(text=text, file_path=temp)
+    def audio_speaker(self, text_, model):
+        models_ok = read_models() ############################################################    check 
+        temp = "temp_audio.wav"
+
+                
+        for i in self.all_models:
+            if i[0] == model:
+                model_ = i[1]
+
+                if model == 'css10' or model == 'Mai':
+                    tts = TTS(model_name=model_)
+                    tts.tts_to_file(text=text_, file_path=temp)
+            else:
+                tts = TTS('tts_models/multilingual/multi-dataset/your_tts')
+
+                if model == 'Female1':
+                    speaker_ = 'female-en-5'
+                if model == 'Female2':
+                    speaker_ = 'female-en-5\n'
+                if model == 'Male1':
+                    speaker_ = 'male-en-2'
+                if model == 'Male2':
+                    speaker_ = 'male-en-2\n'
+
+                    tts.tts_to_file(text=text_, language='en', speaker=speaker_, file_path=temp)
+
         audio = AudioSegment.from_wav(temp)
         play_obj = sa.play_buffer(audio.raw_data, 
                                 num_channels=audio.channels,
@@ -90,22 +90,29 @@ class TTS_Kivy:
 
         os.remove(temp)
 
-    def update_model_spinner(self, spinner, selected_language):
-        values = []
+    def classify_and_list_models(self):
+        result= []
+        for model in self.all_models:
+            name = model[0]
+            result.append(name)
+           
+        print('result: ', result)
+        return result
 
-        if selected_language == 'All' or selected_language == 'Todas' or not selected_language:
-            values = list(self.multilingual_models + self.es_models + self.en_models)
-        elif selected_language == 'Multilingual':
-            values = list(self.multilingual_models)
-        elif selected_language == 'En' or selected_language == 'In':
-            values = list(self.en_models)
-        elif selected_language == 'Es' or selected_language == 'Sp':
-            values = list(self.es_models)
-        
-        spinner.values = values
-
-        print(values)
-        return values
+    def update_model_spinner(self, spinner, lan):
+        result= []
+        if lan == 'All' or lan == 'Todas':
+            for m in self.all_models:
+                result.append(m[0])
+        elif lan == 'Es' or lan == 'Sp':
+            for m in self.es_models:
+                result.append(m[0])
+        elif lan == 'En' or lan == 'In':
+            for m in self.en_models:
+                result.append(m[0])
+           
+        print('result: ', result)
+        return result
 
     def update_model_data(new_data):
         voice_models.clear()

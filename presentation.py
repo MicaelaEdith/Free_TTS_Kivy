@@ -110,10 +110,9 @@ class MyGridLayout(BoxLayout):
 
         row1 = BoxLayout(orientation='horizontal', spacing=30, size_hint_y=None, height=50, padding=[18, 0, 0, 0])
 
-        model_dict = self.tts.classify_and_list_models()
         self.spinner = Spinner(
             text='Select a voice',
-            values=[],
+            values=["tts_models/es/css10/vits","tts_models/multilingual/multi-dataset/your_tts","tts_models/es/mai/tacotron2-DDC"],
             size_hint=(None, None),
             size=(220, 35),
             background_color=self.spinner_background_color,
@@ -140,18 +139,6 @@ class MyGridLayout(BoxLayout):
         self.spinner_l.bind(text=self.on_language_select)
         row1.add_widget(self.spinner_l)
 
-        self.select_button = Button(
-            text='Select',
-            size_hint=(None, None),
-            size=(95, 35),
-            background_color=self.button_color,
-            color=self.text_color,
-            border=(1, 1, 1, 1),
-            font_size='18sp',
-            font_name='MyFont'
-        )
-        row1.add_widget(self.select_button)
-
         self.add_widget(row1)
 
         padding_layout = BoxLayout(orientation='vertical', size_hint_y=None, height=300)
@@ -159,7 +146,7 @@ class MyGridLayout(BoxLayout):
         self.text_input = TextInput(
             hint_text='Type here',
             size_hint=(None, None),
-            size=(480, 300),
+            size=(500, 300),
             multiline=True,
             font_size='16sp',
             font_name='MyFont',
@@ -173,7 +160,7 @@ class MyGridLayout(BoxLayout):
         padding_layout.add_widget(self.text_input)
         self.add_widget(padding_layout)
 
-        row2 = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50, padding=[18, 4, 0, 18])
+        row2 = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=50, padding=[18, 4, 0, 18])
         self.download_button = Button(
             text='Download',
             size_hint=(None, None),
@@ -204,7 +191,6 @@ class MyGridLayout(BoxLayout):
         self.add_widget(row2)
         self.update_menu(self.lan_menu)
         self.on_language_select(self.spinner, 'All')
-
 
     def update_colors(self):
         if not self.theme:          # dark
@@ -261,8 +247,6 @@ class MyGridLayout(BoxLayout):
         self.spinner_l.background_color = self.spinner_background_color
         self.spinner_l.color = self.text_color
 
-        self.select_button.background_color = self.button_color
-        self.select_button.color = self.text_color
         self.download_button.background_color = self.button_color
         self.download_button.color = self.text_color
         self.accept_button.background_color = self.button_color
@@ -275,23 +259,24 @@ class MyGridLayout(BoxLayout):
 
     def on_download_button_press(self, instance):
         model_dict = self.tts.classify_and_list_models()
-        selected_model_path = model_dict.get(self.spinner.text)
+        selected_model_path = self.spinner.text
         self.selected_model = selected_model_path
         self.tts.execute_action(self.text_input.text,self.selected_model)
 
 
     def on_accept_button_press(self, instance):
         model_dict = self.tts.classify_and_list_models()
-        selected_model_path = model_dict.get(self.spinner.text)
+        selected_model_path = self.spinner.text
         self.selected_model = selected_model_path
         self.tts.audio_speaker(self.text_input.text,self.selected_model)
 
     def on_spinner_select(self, spinner, text):
         model_dict = self.tts.classify_and_list_models()
-        selected_model_path = model_dict.get(text)
+        selected_model_path = text
         self.selected_model = selected_model_path
 
     def on_language_select(self,spinner, text):
+        spinner = self.spinner
         self.selection_l = text
         self.spinner.values = self.tts.update_model_spinner(spinner, self.selection_l)
         self.language_dropdown.dismiss()
@@ -305,7 +290,6 @@ class MyGridLayout(BoxLayout):
             self.download_button.text = 'Download'
             self.dark_button.text ='Dark'
             self.light_button.text ='Light'   
-            self.select_button.text='Select'
             self.spanish_button.text='Spanish'
             self.english_button.text='English'
             self.spinner.text='Select a voice'
@@ -321,7 +305,6 @@ class MyGridLayout(BoxLayout):
             self.download_button.text = 'Descargar'
             self.dark_button.text ='Oscuro'
             self.light_button.text ='Claro'
-            self.select_button.text='Seleccion'
             self.spanish_button.text='Español'
             self.english_button.text='Ingles'
             self.spinner.text='Seleccionar voz'

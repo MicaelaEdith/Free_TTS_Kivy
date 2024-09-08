@@ -2,14 +2,14 @@ import csv
 import os
 
 config_csv = 'config.csv'
-models_csv = 'cloned_models.csv'
+models_csv = 'models.csv'
 
 def check_and_create_config_csv():
     if not os.path.exists(config_csv):
         with open(config_csv, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['theme', 'language']) 
-            writer.writerow(['False', 'en'])      
+            writer.writerow(['theme', 'language', 'init']) 
+            writer.writerow(['False', 'en', 'False'])      
 
 def read_config():
     check_and_create_config_csv()
@@ -19,7 +19,6 @@ def read_config():
             return row['theme'], row['language']
         
     return None, None
-
 
 def write_config(color, language):
     check_and_create_config_csv()
@@ -36,11 +35,11 @@ def check_and_create_models_csv():
 
 def read_models():
     check_and_create_models_csv()
-    models = []
+    models = {}
     with open(models_csv, mode='r') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            models.append({'model_name': row['model_name'], 'model_path': row['model_path']})
+            models[row['model_path']] = row['model_name']
     return models
 
 def write_model(model_name, model_path):
@@ -49,4 +48,6 @@ def write_model(model_name, model_path):
         writer = csv.writer(file)
         writer.writerow([model_name, model_path])
 
-
+def is_model_downloaded(model_path):
+    models = read_models()
+    return model_path in models
