@@ -2,6 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
+from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.core.text import LabelBase
 from kivy.utils import get_color_from_hex
@@ -27,6 +28,11 @@ class MyGridLayout(BoxLayout):
         self.config = read_config()
         self.theme = False
         self.lan_menu = 'en'
+        self.alert_color = '#FD582F'    #'#DA370F'
+        self.text_alert ='[b]The text field cannot be empty[/b]'
+
+        if self.lan_menu == 'es':
+              self.text_alert='[b]El campo de texto no puede estar vacío[/b]'
 
         if self.config:
             if self.config[0] == 'True':
@@ -112,7 +118,7 @@ class MyGridLayout(BoxLayout):
 
         self.spinner = Spinner(
             text='Select a voice',
-            values=["tts_models/es/css10/vits","tts_models/multilingual/multi-dataset/your_tts","tts_models/es/mai/tacotron2-DDC"],
+            values=[],
             size_hint=(None, None),
             size=(220, 35),
             background_color=self.spinner_background_color,
@@ -137,9 +143,26 @@ class MyGridLayout(BoxLayout):
         )
 
         self.spinner_l.bind(text=self.on_language_select)
+
         row1.add_widget(self.spinner_l)
 
         self.add_widget(row1)
+
+        layout = BoxLayout(orientation='vertical', padding=[30, 0, 0, 5])
+
+        self.label_text = Label(
+            markup=True,
+            text= self.text_alert,
+            font_name='MyFont',
+            font_size='14sp',
+            color=get_color_from_hex(self.alert_color),
+            halign='left',
+            opacity=0
+        )
+        self.label_text.bind(size=self.label_text.setter('text_size'))
+        layout.add_widget(self.label_text)
+        self.add_widget(layout)
+
 
         padding_layout = BoxLayout(orientation='vertical', size_hint_y=None, height=300)
         padding_layout.padding = [18, 0, 0, 0]
@@ -159,6 +182,7 @@ class MyGridLayout(BoxLayout):
         )
         padding_layout.add_widget(self.text_input)
         self.add_widget(padding_layout)
+
 
         row2 = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=50, padding=[18, 4, 0, 18])
         self.download_button = Button(
@@ -265,10 +289,10 @@ class MyGridLayout(BoxLayout):
 
 
     def on_accept_button_press(self, instance):
-        model_dict = self.tts.classify_and_list_models()
-        selected_model_path = self.spinner.text
-        self.selected_model = selected_model_path
-        self.tts.audio_speaker(self.text_input.text,self.selected_model)
+        if self.validate():       
+            selected_model_path = self.spinner.text
+            self.selected_model = selected_model_path
+            self.tts.audio_speaker(self.text_input.text,self.selected_model)
 
     def on_spinner_select(self, spinner, text):
         model_dict = self.tts.classify_and_list_models()
@@ -297,6 +321,7 @@ class MyGridLayout(BoxLayout):
             self.spinner_l.text='lan'
             self.spinner_l.values=['All', 'En', 'Sp']
             self.lan_menu = 'en'
+            self.text_alert ='[b]The text field cannot be empty[/b]'
             
         else:
             self.theme_button.text = 'Modo'
@@ -312,7 +337,22 @@ class MyGridLayout(BoxLayout):
             self.spinner_l.text='len'
             self.spinner_l.values=['Todas', 'In', 'Es']
             self.lan_menu = 'es'
+            self.text_alert='[b]El campo de texto no puede estar vacío[/b]'
         write_config(str(self.theme), self.lan_menu)
+
+    def validate(self):
+        if (self.text_input.text.strip() != '') and (self.spinner.text != 'Seleccionar voz' and self.spinner.text != 'Select a voice'):
+            #self.label_text.opacity = 0
+            return True
+        
+        if self.text_input.text.strip() == '':
+            self.label_text.opacity = 1
+            return False
+        
+        if self.spinner.text == 'Seleccionar voz' or self.spinner.text == 'Select a voice':
+            print('seleccionar voz')
+            return False
+        
 
     def on_request_close(self, *args):
         return False

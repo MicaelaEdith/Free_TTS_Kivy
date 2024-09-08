@@ -10,6 +10,7 @@ from app_data import voice_models
 import simpleaudio as sa
 from csv_functions import *
 import os
+from model_downloader import download_models
 
 
 class TTS_Kivy:
@@ -54,49 +55,65 @@ class TTS_Kivy:
             print('model missing')
 
 
-
     def audio_speaker(self, text_, model):
-        models_ok = read_models() ############################################################    check 
-        temp = "temp_audio.wav"
+        models_ok = read_models()
+        result = None
+        for key, value in models_ok.items():
+            if model in key:
+                print(f"Modelo encontrado: {value}")
+                result = value
+            
+        if result != None:                                
+            temp = "temp_audio.wav"
+            for i in self.all_models:
+                if i[0] == model:
+                    model_ = i[1]
 
-                
-        for i in self.all_models:
-            if i[0] == model:
-                model_ = i[1]
+                    if model == 'css10' or model == 'Mai':
+                        tts = TTS(model_name=model_)
+                        tts.tts_to_file(text=text_, file_path=temp)
+                    else:
+                        tts = TTS('tts_models/multilingual/multi-dataset/your_tts')
 
-                if model == 'css10' or model == 'Mai':
-                    tts = TTS(model_name=model_)
-                    tts.tts_to_file(text=text_, file_path=temp)
-            else:
-                tts = TTS('tts_models/multilingual/multi-dataset/your_tts')
+                        if model == 'Female1':
+                            speaker_ = 'female-en-5'
+                        if model == 'Female2':
+                            speaker_ = 'female-en-5\n'
+                        if model == 'Male1':
+                            speaker_ = 'male-en-2'
+                        if model == 'Male2':
+                            speaker_ = 'male-en-2\n'
 
-                if model == 'Female1':
-                    speaker_ = 'female-en-5'
-                if model == 'Female2':
-                    speaker_ = 'female-en-5\n'
-                if model == 'Male1':
-                    speaker_ = 'male-en-2'
-                if model == 'Male2':
-                    speaker_ = 'male-en-2\n'
+                        tts.tts_to_file(text=text_, language='en', speaker=speaker_, file_path=temp)
 
-                    tts.tts_to_file(text=text_, language='en', speaker=speaker_, file_path=temp)
+            audio = AudioSegment.from_wav(temp)
+            play_obj = sa.play_buffer(audio.raw_data, 
+                                    num_channels=audio.channels,
+                                    bytes_per_sample=audio.sample_width, 
+                                    sample_rate=audio.frame_rate)
+            play_obj.wait_done()
+            os.remove(temp)
 
-        audio = AudioSegment.from_wav(temp)
-        play_obj = sa.play_buffer(audio.raw_data, 
-                                num_channels=audio.channels,
-                                bytes_per_sample=audio.sample_width, 
-                                sample_rate=audio.frame_rate)
-        play_obj.wait_done()
+        else:
+            print("Modelo no encontrado")
+            buscar = input('buscar?')
 
-        os.remove(temp)
+            if buscar.lower() == 'si':
+                for i in self.all_models:
+                    if i[0] == model:
+                        model_ = i[1]
+                        print('i[0]: ',i[0])
+                        print('i[1]: ',i[1])
+                        print('model_ :', model_)
+
+                download_models()
+
 
     def classify_and_list_models(self):
         result= []
         for model in self.all_models:
             name = model[0]
             result.append(name)
-           
-        print('result: ', result)
         return result
 
     def update_model_spinner(self, spinner, lan):
