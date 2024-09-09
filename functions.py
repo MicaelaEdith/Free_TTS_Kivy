@@ -40,7 +40,6 @@ class TTS_Kivy:
         return result
 
     def execute_action(self, text_input, model):
-        print('selected Model in fuction: ', model)
         for i in self.all_models:
             if i[0] == model:
                 model_ = i[1]
@@ -56,12 +55,20 @@ class TTS_Kivy:
 
 
     def audio_speaker(self, text_, model):
+        if model == 'Female1' or model == 'Female2' or model == 'Male1' or model == 'Male2':
+            self.model= 'your_tts'
+        else:
+            self.model = model
+
         models_ok = read_models()
         result = None
         for key, value in models_ok.items():
-            if model in key:
+            if self.model in key:
                 print(f"Modelo encontrado: {value}")
                 result = value
+            else:
+                print('model key: ', key)
+            
             
         if result != None:                                
             temp = "temp_audio.wav"
@@ -102,10 +109,6 @@ class TTS_Kivy:
                 for i in self.all_models:
                     if i[0] == model:
                         model_ = i[1]
-                        print('i[0]: ',i[0])
-                        print('i[1]: ',i[1])
-                        print('model_ :', model_)
-
                 download_models()
 
 
@@ -127,8 +130,7 @@ class TTS_Kivy:
         elif lan == 'En' or lan == 'In':
             for m in self.en_models:
                 result.append(m[0])
-           
-        print('result: ', result)
+                
         return result
 
     def update_model_data(new_data):

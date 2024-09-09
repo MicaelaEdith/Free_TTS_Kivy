@@ -19,8 +19,11 @@ def download_models():
 
 
 def download_one_model(model):
-    model__ = 'tts_models/es/css10/vits'
+    model__ = 'tts_models/es/mai/tacotron2-DDC'
     model_manager = ModelManager()
     print('paso')
     model_path, config_path, model_item = model_manager.download_model(model__)
     write_model(model, model_path)
+
+
+download_one_model('m')

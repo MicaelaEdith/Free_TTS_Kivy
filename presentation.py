@@ -29,10 +29,6 @@ class MyGridLayout(BoxLayout):
         self.theme = False
         self.lan_menu = 'en'
         self.alert_color = '#FD582F'    #'#DA370F'
-        self.text_alert ='[b]The text field cannot be empty[/b]'
-
-        if self.lan_menu == 'es':
-              self.text_alert='[b]El campo de texto no puede estar vacío[/b]'
 
         if self.config:
             if self.config[0] == 'True':
@@ -114,6 +110,21 @@ class MyGridLayout(BoxLayout):
 
         Window.clearcolor = self.window_background_color
 
+        layout_v = BoxLayout(orientation='vertical', padding=[25, 0, 0, 0])
+
+        self.label_voice = Label(
+            markup=True,
+            text='[b]* Select a voice[/b]',
+            font_name='MyFont',
+            font_size='14sp',
+            color=get_color_from_hex(self.alert_color),
+            halign='left',
+            opacity=0
+        )
+        self.label_voice.bind(size=self.label_voice.setter('text_size'))
+        layout_v.add_widget(self.label_voice)
+        self.add_widget(layout_v)
+
         row1 = BoxLayout(orientation='horizontal', spacing=30, size_hint_y=None, height=50, padding=[18, 0, 0, 0])
 
         self.spinner = Spinner(
@@ -148,11 +159,11 @@ class MyGridLayout(BoxLayout):
 
         self.add_widget(row1)
 
-        layout = BoxLayout(orientation='vertical', padding=[30, 0, 0, 5])
+        layout = BoxLayout(orientation='vertical', padding=[25, 0, 0, 5])
 
         self.label_text = Label(
             markup=True,
-            text= self.text_alert,
+            text='[b]* The text field cannot be empty[/b]',
             font_name='MyFont',
             font_size='14sp',
             color=get_color_from_hex(self.alert_color),
@@ -321,7 +332,8 @@ class MyGridLayout(BoxLayout):
             self.spinner_l.text='lan'
             self.spinner_l.values=['All', 'En', 'Sp']
             self.lan_menu = 'en'
-            self.text_alert ='[b]The text field cannot be empty[/b]'
+            self.label_text.text ='[b]* The text field cannot be empty[/b]'
+            self.label_voice.text = '[b]* Select a voice[/b]'
             
         else:
             self.theme_button.text = 'Modo'
@@ -337,12 +349,16 @@ class MyGridLayout(BoxLayout):
             self.spinner_l.text='len'
             self.spinner_l.values=['Todas', 'In', 'Es']
             self.lan_menu = 'es'
-            self.text_alert='[b]El campo de texto no puede estar vacío[/b]'
+            self.label_text.text='[b]* El campo de texto no puede estar vacío[/b]'
+            self.label_voice.text = '[b]* Seleccione una voz[/b]'
+
+
         write_config(str(self.theme), self.lan_menu)
 
     def validate(self):
         if (self.text_input.text.strip() != '') and (self.spinner.text != 'Seleccionar voz' and self.spinner.text != 'Select a voice'):
-            #self.label_text.opacity = 0
+            self.label_text.opacity = 0
+            self.label_voice.opacity = 0
             return True
         
         if self.text_input.text.strip() == '':
@@ -350,7 +366,7 @@ class MyGridLayout(BoxLayout):
             return False
         
         if self.spinner.text == 'Seleccionar voz' or self.spinner.text == 'Select a voice':
-            print('seleccionar voz')
+            self.label_voice.opacity = 1
             return False
         
 
