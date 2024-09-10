@@ -14,6 +14,8 @@ class MyApp(App):
         self.icon = 'assets/img/favicon.png'
         return MyGridLayout()
 
-
 if __name__ == '__main__':
     MyApp().run()
+
+
+

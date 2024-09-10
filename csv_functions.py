@@ -43,11 +43,17 @@ def read_models():
     return models
 
 def write_model(model_name, model_path):
-    check_and_create_models_csv()
+    models = read_models()
+    
+    if model_path in models:
+        return
+    
     with open(models_csv, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([model_name, model_path])
 
+
 def is_model_downloaded(model_path):
     models = read_models()
+    print('lo que retorna is_model_downloaded es: ', model_path in models)
     return model_path in models

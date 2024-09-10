@@ -17,8 +17,8 @@ class TTS_Kivy:
     def __init__(self):
         self.model_manager = ModelManager()
         self.models = self.model_manager.list_models()
-        self.all_models= [['css10','tts_models/es/css10/vits'],['Mai','tts_models/es/mai/tacotron2-DDC'],['Female1','tts_models/multilingual/multi-dataset/your_tts'],['Female2','tts_models/multilingual/multi-dataset/your_tts'],['Male1','tts_models/multilingual/multi-dataset/your_tts'],['Male2','tts_models/multilingual/multi-dataset/your_tts']]
-        self.es_models = [['css10','tts_models/es/css10/vits'],['Mai','tts_models/es/mai/tacotron2-DDC']]
+        self.all_models= [['css10','tts_models/es/css10/vits'],['mai','tts_models/es/mai/tacotron2-DDC'],['Female1','tts_models/multilingual/multi-dataset/your_tts'],['Female2','tts_models/multilingual/multi-dataset/your_tts'],['Male1','tts_models/multilingual/multi-dataset/your_tts'],['Male2','tts_models/multilingual/multi-dataset/your_tts']]
+        self.es_models = [['css10','tts_models/es/css10/vits'],['mai','tts_models/es/mai/tacotron2-DDC']]
         self.en_models = [['Female1','tts_models/multilingual/multi-dataset/your_tts'],['Female2','tts_models/multilingual/multi-dataset/your_tts'],['Male1','tts_models/multilingual/multi-dataset/your_tts'],['Male2','tts_models/multilingual/multi-dataset/your_tts']]
         self.filter = False
         self.filter_on = 'all'
@@ -55,62 +55,56 @@ class TTS_Kivy:
 
 
     def audio_speaker(self, text_, model):
-        if model == 'Female1' or model == 'Female2' or model == 'Male1' or model == 'Male2':
-            self.model= 'your_tts'
+        if model in ['Female1', 'Female2', 'Male1', 'Male2']:
+            self.model = 'your_tts'
         else:
             self.model = model
 
         models_ok = read_models()
         result = None
+
         for key, value in models_ok.items():
             if self.model in key:
                 print(f"Modelo encontrado: {value}")
                 result = value
             else:
                 print('model key: ', key)
-            
-            
-        if result != None:                                
-            temp = "temp_audio.wav"
-            for i in self.all_models:
-                if i[0] == model:
-                    model_ = i[1]
 
-                    if model == 'css10' or model == 'Mai':
-                        tts = TTS(model_name=model_)
-                        tts.tts_to_file(text=text_, file_path=temp)
-                    else:
-                        tts = TTS('tts_models/multilingual/multi-dataset/your_tts')
-
-                        if model == 'Female1':
-                            speaker_ = 'female-en-5'
-                        if model == 'Female2':
-                            speaker_ = 'female-en-5\n'
-                        if model == 'Male1':
-                            speaker_ = 'male-en-2'
-                        if model == 'Male2':
-                            speaker_ = 'male-en-2\n'
-
-                        tts.tts_to_file(text=text_, language='en', speaker=speaker_, file_path=temp)
-
-            audio = AudioSegment.from_wav(temp)
-            play_obj = sa.play_buffer(audio.raw_data, 
-                                    num_channels=audio.channels,
-                                    bytes_per_sample=audio.sample_width, 
-                                    sample_rate=audio.frame_rate)
-            play_obj.wait_done()
-            os.remove(temp)
-
-        else:
-            print("Modelo no encontrado")
-            buscar = input('buscar?')
-
-            if buscar.lower() == 'si':
+        if result is not None:     
+            try:
+                temp = "temp_audio.wav"
                 for i in self.all_models:
                     if i[0] == model:
                         model_ = i[1]
-                download_models()
 
+                        if model in ['css10', 'mai']:
+                            tts = TTS(model_name=model_)
+                            tts.tts_to_file(text=text_, file_path=temp)
+                        else:
+                            tts = TTS('tts_models/multilingual/multi-dataset/your_tts')
+
+                            speaker_map = {
+                                'Female1': 'female-en-5',
+                                'Female2': 'female-en-5\n',
+                                'Male1': 'male-en-2',
+                                'Male2': 'male-en-2\n'
+                            }
+                            speaker_ = speaker_map.get(model, '')
+                            tts.tts_to_file(text=text_, language='en', speaker=speaker_, file_path=temp)
+
+                audio = AudioSegment.from_wav(temp)
+                play_obj = sa.play_buffer(audio.raw_data, 
+                                        num_channels=audio.channels,
+                                        bytes_per_sample=audio.sample_width, 
+                                        sample_rate=audio.frame_rate)
+                play_obj.wait_done()
+                os.remove(temp)
+                return True
+
+            except:
+                print("An exception occurred")  
+                return False                         
+           
 
     def classify_and_list_models(self):
         result= []

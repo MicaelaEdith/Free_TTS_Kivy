@@ -10,10 +10,13 @@ from functions import TTS_Kivy
 from kivy.uix.switch import Switch
 from kivy.uix.actionbar import ActionBar, ActionView, ActionButton
 from kivy.uix.dropdown import DropDown
+from kivy.uix.popup import Popup
 from kivy.graphics import Color, Line
 from kivy.uix.widget import Widget
+from kivy.clock import Clock
 from csv_functions import *
 from app_data import *
+from model_downloader import download_one_model
 
 LabelBase.register(name='MyFont', fn_regular='assets/NotoSans-VariableFont_wdthwght.ttf')
 
@@ -41,7 +44,7 @@ class MyGridLayout(BoxLayout):
         Window.borderless = False
         self.update_colors()
 
-        action_bar = BoxLayout(size_hint_y=None, height=45, padding=[18, 0, 0, 0], orientation='horizontal', spacing=10)
+        action_bar = BoxLayout(size_hint_y=None, height=38, padding=[15, 0, 0, 0], orientation='horizontal', spacing=10)
         
         action_view = BoxLayout(size_hint=(1, 1), padding=[0, 0, 0, 0], orientation='horizontal', spacing=10)
 
@@ -303,7 +306,89 @@ class MyGridLayout(BoxLayout):
         if self.validate():       
             selected_model_path = self.spinner.text
             self.selected_model = selected_model_path
-            self.tts.audio_speaker(self.text_input.text,self.selected_model)
+            if not self.tts.audio_speaker(self.text_input.text,self.selected_model):
+                self.popup_download()
+
+
+    def popup_download(self):
+        text_title = 'Model not found'
+        text_context = 'Download model'
+        text_cancel = 'Cancel'
+
+        if self.lan_menu == 'es':
+            text_title = 'Modelo no encontrado'
+            text_context = 'Descargar Modelo'
+            text_cancel = 'Cancelar'
+
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+
+        button_layout = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50)
+
+        btn_yes = Button(text=text_context, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(150, 50))
+        btn_yes.bind(on_press=lambda instance: self.start_download(pop))
+
+        btn_cancel = Button(text=text_cancel, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(150, 50))
+        btn_cancel.bind(on_press=lambda instance: pop.dismiss())
+
+        button_layout.add_widget(btn_yes)
+        button_layout.add_widget(btn_cancel)
+
+        layout.add_widget(button_layout)
+        pop = Popup(title=text_title,
+                    content=layout,
+                    size_hint=(None, None), size=(360, 140),
+                    separator_color=self.text_color,
+                    auto_dismiss=False)
+
+        pop.open()
+
+    def start_download(self, popup):
+        popup.dismiss()
+        print('Descargando...')
+        self.popup_progress()
+
+    def popup_progress(self):
+        text_progress = 'Descargando...'
+        text_cancel_download = 'Cancelar descarga'
+        text_accept = 'Aceptar'
+
+        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
+        button_layout = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50)
+
+        self.progress_label = Label(text=text_progress, color=self.text_color)
+
+        self.btn_accept = Button(text=text_accept, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(160, 50))
+        self.btn_accept.disabled = True
+        self.btn_accept.bind(on_press = lambda instance: self.popup_progress.dismiss())
+
+        self.btn_cancel_download = Button(text=text_cancel_download, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(160, 50))
+        self.btn_cancel_download.bind(on_press=lambda instance: self.popup_progress.dismiss())
+
+        button_layout.add_widget(self.btn_accept)
+        button_layout.add_widget(self.btn_cancel_download)
+        layout.add_widget(self.progress_label)
+        layout.add_widget(button_layout)
+
+        self.popup_progress = Popup(title='Progreso de la descarga',
+                                content=layout,
+                                size_hint=(None, None), size=(400, 200),
+                                separator_color=self.text_color,
+                                auto_dismiss=False)
+
+        self.popup_progress.open()
+
+        Clock.schedule_once(self.start_download_process, 0)
+
+    def start_download_process(self, dt):
+        download_result = download_one_model(self.spinner.text)
+
+        if download_result:
+            self.btn_accept.disabled = False
+            self.btn_cancel_download.disabled = True
+            self.progress_label.text = "Descarga completada con éxito"
+        else:
+            self.progress_label.text = "La descarga falló"
+        
 
     def on_spinner_select(self, spinner, text):
         model_dict = self.tts.classify_and_list_models()
@@ -352,7 +437,7 @@ class MyGridLayout(BoxLayout):
             self.label_text.text='[b]* El campo de texto no puede estar vacío[/b]'
             self.label_voice.text = '[b]* Seleccione una voz[/b]'
 
-
+        self.on_language_select(self.spinner, 'All')
         write_config(str(self.theme), self.lan_menu)
 
     def validate(self):

@@ -1,5 +1,5 @@
 from TTS.utils.manage import ModelManager
-from csv_functions import write_model, read_models
+from csv_functions import write_model, read_models, is_model_downloaded
 from TTS.api import TTS
 
 models_to_download = [
@@ -7,23 +7,38 @@ models_to_download = [
     "tts_models/multilingual/multi-dataset/your_tts",
     "tts_models/es/mai/tacotron2-DDC"]
 
+models_your_tts = ['Female1', 'Female2', 'Male1', 'Male2']
+
 def download_models():
     model_manager = ModelManager()
-    models_ok = read_models()         
+    models_in_csv = read_models()
 
     for model_name in models_to_download:
-        print(f"Descargando el modelo {model_name}...")
-        model_path, config_path, model_item = model_manager.download_model(model_name)
-        print(f"Modelo {model_name} descargado en: {model_path}")
-        write_model(model_name, model_path)
-
+        if not is_model_downloaded(model_name):
+            print(f"Descargando el modelo {model_name}...")
+            model_path, config_path, model_item = model_manager.download_model(model_name)
+            print(f"Modelo {model_name} descargado en: {model_path}")
+            write_model(model_name, model_path)
+        else:
+            print(f"El modelo {model_name} ya está descargado.")
 
 def download_one_model(model):
-    model__ = 'tts_models/es/mai/tacotron2-DDC'
+    model_ = model
     model_manager = ModelManager()
-    print('paso')
-    model_path, config_path, model_item = model_manager.download_model(model__)
-    write_model(model, model_path)
+    models_in_csv = read_models()
+    if model in models_your_tts:
+        model_ = "tts_models/multilingual/multi-dataset/your_tts"
 
+    print('model_ : ',model_)
 
-download_one_model('m')
+    for model_name in models_to_download:
+        if model_ in model_name and not is_model_downloaded(model_name):
+            model_path, config_path, model_item = model_manager.download_model(model_name)
+            print(f"Modelo {model_name} descargado en: {model_path}")
+            write_model(model_name, model_path)
+            return True
+        else:
+            print(f"El modelo {model_name} ya está descargado o no se encontró el modelo.")
+            return False
+
+        
