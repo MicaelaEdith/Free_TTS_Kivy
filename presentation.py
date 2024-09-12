@@ -296,10 +296,13 @@ class MyGridLayout(BoxLayout):
         self.text_input.selection_color = self.text_color
 
     def on_download_button_press(self, instance):
-        model_dict = self.tts.classify_and_list_models()
-        selected_model_path = self.spinner.text
-        self.selected_model = selected_model_path
-        self.tts.execute_action(self.text_input.text,self.selected_model)
+        if self.validate():
+            selected_model_path = self.spinner.text
+            self.selected_model = selected_model_path
+            if self.tts.execute_action(self.text_input.text,self.selected_model):
+                self.file_ok()
+            else:
+                self.popup_error()
 
 
     def on_accept_button_press(self, instance):
@@ -308,6 +311,7 @@ class MyGridLayout(BoxLayout):
             self.selected_model = selected_model_path
             if not self.tts.audio_speaker(self.text_input.text,self.selected_model):
                 self.popup_download()
+
 
 
     def popup_download(self):
@@ -359,35 +363,95 @@ class MyGridLayout(BoxLayout):
 
         self.btn_accept = Button(text=text_accept, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(160, 50))
         self.btn_accept.disabled = True
-        self.btn_accept.bind(on_press = lambda instance: self.popup_progress.dismiss())
+        self.btn_accept.bind(on_press = lambda instance: popup_progress.dismiss())
 
         self.btn_cancel_download = Button(text=text_cancel_download, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(160, 50))
-        self.btn_cancel_download.bind(on_press=lambda instance: self.popup_progress.dismiss())
+        self.btn_cancel_download.bind(on_press=lambda instance: popup_progress.dismiss())
 
         button_layout.add_widget(self.btn_accept)
         button_layout.add_widget(self.btn_cancel_download)
         layout.add_widget(self.progress_label)
         layout.add_widget(button_layout)
 
-        self.popup_progress = Popup(title='Progreso de la descarga',
+        popup_progress = Popup(title='Progreso de la descarga',
                                 content=layout,
                                 size_hint=(None, None), size=(400, 200),
                                 separator_color=self.text_color,
                                 auto_dismiss=False)
 
-        self.popup_progress.open()
+        popup_progress.open()
 
         Clock.schedule_once(self.start_download_process, 0)
 
-    def start_download_process(self, dt):
-        download_result = download_one_model(self.spinner.text)
 
-        if download_result:
-            self.btn_accept.disabled = False
-            self.btn_cancel_download.disabled = True
-            self.progress_label.text = "Descarga completada con éxito"
-        else:
-            self.progress_label.text = "La descarga falló"
+    def popup_error(self):
+        text_title = 'Error - Try again later'
+        text_cancel = 'Cancel'
+
+        if self.lan_menu == 'es':
+            text_title = 'Error - Intente nuevamente '
+            text_cancel = 'Cancelar'
+
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+
+        button_layout = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50)
+
+        btn_cancel = Button(text=text_cancel, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(150, 50))
+        btn_cancel.bind(on_press=lambda instance: pop.dismiss())
+
+        button_layout.add_widget(btn_cancel)
+
+        layout.add_widget(button_layout)
+        pop = Popup(title=text_title,
+                    content=layout,
+                    size_hint=(None, None), size=(200, 140),
+                    separator_color=self.text_color,
+                    auto_dismiss=False)
+
+        pop.open()
+
+
+    def file_ok(self):
+        text_title = 'Downloaded file in:'
+        text_ok = 'Ok'
+
+        if self.lan_menu == 'es':
+            text_title = 'Archivo descargado con éxito en:'
+            text_ok = 'Aceptar'
+
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        label = Label(text = self.tts.file_path)
+
+        button_layout = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=50, padding = [80,65,100,0])
+
+        btn_cancel = Button(text=text_ok, background_color=self.button_color, color=self.text_color, size_hint=(None, None), size=(150, 50))
+        btn_cancel.bind(on_press=lambda instance: pop.dismiss())
+
+        button_layout.add_widget(btn_cancel)
+        layout.add_widget(label)
+        layout.add_widget(button_layout)
+        pop = Popup(title=text_title,
+                    content=layout,
+                    size_hint=(None, None), size=(350, 160),
+                    separator_color=self.text_color,
+                    auto_dismiss=False)
+
+        pop.open()
+
+
+
+    def start_download_process(self, dt):        
+        try:
+            print('inicio de descarga de :', self.spinner.text)
+            download_result = download_one_model(self.spinner.text)
+            if download_result:
+                self.btn_accept.disabled = False
+                self.btn_cancel_download.disabled = True
+                self.progress_label.text = "Descarga completada con éxito"
+            else:
+                self.progress_label.text = "La descarga falló"
+        except:
+            self.popup_error()
         
 
     def on_spinner_select(self, spinner, text):

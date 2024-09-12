@@ -25,7 +25,7 @@ def download_models():
 def download_one_model(model):
     model_ = model
     model_manager = ModelManager()
-    models_in_csv = read_models()
+    
     if model in models_your_tts:
         model_ = "tts_models/multilingual/multi-dataset/your_tts"
 
@@ -37,8 +37,3 @@ def download_one_model(model):
             print(f"Modelo {model_name} descargado en: {model_path}")
             write_model(model_name, model_path)
             return True
-        else:
-            print(f"El modelo {model_name} ya está descargado o no se encontró el modelo.")
-            return False
-
-        
